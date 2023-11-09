@@ -15,6 +15,10 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { useEmployeeStore } from "@/store/employee-store";
+import { v4 } from "uuid";
+import { IEmployee } from "@/types/Employee";
+import { useRouter } from "next/navigation";
 
 type InitialValues = z.infer<typeof employeeSchema> & {
   id: Number;
@@ -32,6 +36,9 @@ export default function EmployeeForm({
 }: {
   initialValues?: InitialValues;
 }) {
+  const store = useEmployeeStore();
+  const router = useRouter();
+
   const form = useForm<z.infer<typeof employeeSchema>>({
     resolver: zodResolver(employeeSchema),
     defaultValues: {
@@ -43,7 +50,17 @@ export default function EmployeeForm({
 
   function onSubmit(values: z.infer<typeof employeeSchema>) {
     console.log(values);
+    const payload: IEmployee = {
+      ...values,
+      id: v4(),
+      profile_image: "",
+    };
+
+    store.createEmployee(payload);
+    router.push("/view-employee");
   }
+
+  console.log(store);
 
   return (
     <div>

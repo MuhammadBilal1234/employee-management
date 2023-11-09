@@ -31,7 +31,7 @@ export default function RootLayout({
           <main className="container flex space-x-5 text-xl">
             <Link href="/add-employee">New Employee</Link>
             <Link href="/edit-employee/id">Edit Employee</Link>
-            <Link href="/">View Employee</Link>
+            <Link href="/view-employee">View Employee</Link>
           </main>
         </nav>
         <main className="container">{children}</main>
