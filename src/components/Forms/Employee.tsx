@@ -19,9 +19,12 @@ import { useEmployeeStore } from "@/store/employee-store";
 import { v4 } from "uuid";
 import { IEmployee } from "@/types/Employee";
 import { useRouter } from "next/navigation";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import { useState } from "react";
+import { getImageData } from "@/lib/utils";
 
 type InitialValues = z.infer<typeof employeeSchema> & {
-  id: Number;
+  id: number | string;
   profile_image: string;
 };
 
@@ -33,11 +36,14 @@ export default function EmployeeForm({
     id: 0,
     profile_image: "",
   },
+  editEmployee = false,
 }: {
   initialValues?: InitialValues;
+  editEmployee?: boolean;
 }) {
   const store = useEmployeeStore();
   const router = useRouter();
+  const [preview, setPreview] = useState("");
 
   const form = useForm<z.infer<typeof employeeSchema>>({
     resolver: zodResolver(employeeSchema),
@@ -45,6 +51,7 @@ export default function EmployeeForm({
       employee_age: initialValues.employee_age,
       employee_name: initialValues.employee_name,
       employee_salary: initialValues.employee_salary,
+      profile_image: initialValues.profile_image,
     },
   });
 
@@ -52,21 +59,58 @@ export default function EmployeeForm({
     console.log(values);
     const payload: IEmployee = {
       ...values,
-      id: v4(),
-      profile_image: "",
+      id: editEmployee ? initialValues.id : v4(),
     };
 
-    store.createEmployee(payload);
+    if (editEmployee) {
+      store.editEmployee(payload);
+    } else {
+      store.createEmployee(payload);
+    }
+
     router.push("/view-employee");
   }
 
-  console.log(store);
+  console.log(preview ? preview : initialValues.profile_image);
 
   return (
     <div>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
           <main className="grid  sm:grid-cols-2 gap-4">
+            <div className="flex justify-around">
+              <Avatar className="w-24 h-24">
+                <AvatarImage
+                  src={preview ? preview : initialValues.profile_image}
+                />
+                <AvatarFallback>{`${initialValues.employee_name?.[0] ?? ""}${
+                  initialValues.employee_name.split(" ")?.[1]?.[0] ?? ""
+                }`}</AvatarFallback>
+              </Avatar>
+              <FormField
+                control={form.control}
+                name="profile_image"
+                render={({ field: { onChange, value, ...rest } }) => (
+                  <>
+                    <FormItem>
+                      <FormLabel>Avatar</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="file"
+                          {...rest}
+                          onChange={(event) => {
+                            const { files, displayUrl } = getImageData(event);
+                            setPreview(displayUrl);
+                            onChange(displayUrl);
+                          }}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  </>
+                )}
+              />
+            </div>
             <FormField
               control={form.control}
               name="employee_name"
@@ -120,7 +164,7 @@ export default function EmployeeForm({
                     <Input
                       placeholder="enter salary"
                       {...field}
-                      type="text"
+                      type="number"
                       onChange={(event) => {
                         if (
                           isNaN(

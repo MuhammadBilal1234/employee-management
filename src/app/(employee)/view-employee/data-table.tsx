@@ -31,14 +31,8 @@ export function DataTable<TData, TValue>({
 }: DataTableProps<TData, TValue>) {
   const store = useEmployeeStore();
 
-  useEffect(() => {
-    if (store.employees.length < 25) {
-      store.populateEmployees(data);
-    }
-  }, []);
-
   const table = useReactTable({
-    data: store.employees,
+    data: store.employees ?? [],
     columns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),

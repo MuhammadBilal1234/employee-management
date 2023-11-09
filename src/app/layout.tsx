@@ -3,6 +3,8 @@ import "./globals.css";
 import { Inter as FontSans } from "next/font/google";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
+import Provider from "@/providers/Provider";
+import Header from "@/components/Header";
 
 export const fontSans = FontSans({
   subsets: ["latin"],
@@ -27,14 +29,10 @@ export default function RootLayout({
           fontSans.variable
         )}
       >
-        <nav className=" py-5">
-          <main className="container flex space-x-5 text-xl">
-            <Link href="/add-employee">New Employee</Link>
-            <Link href="/edit-employee/id">Edit Employee</Link>
-            <Link href="/view-employee">View Employee</Link>
-          </main>
-        </nav>
-        <main className="container">{children}</main>
+        <Provider>
+          <Header />
+          <main className="container">{children}</main>
+        </Provider>
       </body>
     </html>
   );
